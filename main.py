@@ -1,46 +1,52 @@
 import os
 from art import logo, vs
 from game_data import data
-from random import randint
+from random import choice
+
+
+score = 0
+should_continue = True
 
 def cls():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-score = 0
-right = True
+def format_data(account):
+    """Format the account data and returns the printable format."""
+    account_name = account["name"]
+    account_descr = account["description"]
+    account_country = account["country"]
+    return f"{account_name}, a {account_descr}, from {account_country}"
 
-while right:
-    random_a = randint(0, len(data) - 1)
-    random_b = randint(0, len(data) - 1)
+def check_answer(guess, a_followers, b_followers):
+    """Take the users guess and follower count and returns if they got It right."""
+    if a_followers > b_followers:
+        return guess == "A"
+    else:
+        return guess == "B"
 
-    if random_a == random_b:
-        random_b = randint(0, len(data) - 1)
+while should_continue:
+    a = choice(data)
+    b = choice(data)
 
-    a = data[random_a]
-    b = data[random_b]
-
-    if a["follower_count"] > b["follower_count"]:
-        higher = a
-    elif b["follower_count"] > a["follower_count"]:
-        higher = b
+    while a == b:
+        b = choice(data)
 
     print(logo)
-    if score > 0:
-        print(f"You're right! Current score: {score}.")
-    print(f"Compare A: {a['name']}, a {a['description']}, from {a['country']}.")
+    print(f"Compare A: {format_data(a)}.")
     print(vs)
-    print(f"Against B: {b['name']}, a {b['description']}, from {b['country']}.")
+    print(f"Against B: {format_data(b)}.")
 
-    choice = input("Who has more followers? Type 'A' or 'B': ").upper()
+    guess = input("Who has more followers? Type 'A' or 'B': ").upper()
     cls()
 
-    if  choice == 'A' and higher == a:
+    a_follower_count = a["follower_count"]
+    b_follower_count = b["follower_count"]
+
+    is_correct = check_answer(guess, a_follower_count, b_follower_count)
+
+    if is_correct:
         score += 1
-    elif choice == 'A' and higher == b:
-        right = False
+        print(f"You're right! Current score: {score}.")
+    else:
+        should_continue = False
         print(f"Sorry, that's wrong. Final score: {score}")
-    elif choice == 'B' and higher == a:
-        right = False
-        print(f"Sorry, that's wrong. Final score: {score}")
-    elif choice == 'B' and higher == b:
-        score += 1
